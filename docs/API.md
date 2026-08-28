@@ -16,6 +16,11 @@
 | GET | `/records/export.csv` | 导出 UTF-8 CSV |
 | GET | `/sla-summary` | SLA、逾期、风险和人员工作量 |
 | POST | `/domain/decision` | 执行企业低代码应用开发平台专属领域规则 |
+| GET/POST | `/lowcode/applications` | 应用版本查询与创建 |
+| GET | `/lowcode/applications/{id}/publish-gate` | 执行应用发布门禁 |
+| POST | `/lowcode/applications/{id}/submit` | 提交应用验收 |
+| POST | `/admin/lowcode/applications/{id}/publish` | 发布并归档旧版本 |
+| POST | `/admin/lowcode/applications/{id}/rollback` | 按快照回退已发布版本 |
 | GET/POST | `/enterprise/controls` | 企业控制项查询与幂等创建 |
 | GET | `/enterprise/workbench` | 按组织与账期查询治理驾驶舱 |
 | GET | `/enterprise/period-status` | 查询组织账期锁定状态 |
