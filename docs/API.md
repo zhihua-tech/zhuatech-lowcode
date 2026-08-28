@@ -18,6 +18,7 @@
 | POST | `/domain/decision` | 执行企业低代码应用开发平台专属领域规则 |
 | GET/POST | `/lowcode/applications` | 应用版本查询与创建 |
 | GET | `/lowcode/applications/{id}/publish-gate` | 执行应用发布门禁 |
+| POST | `/lowcode/applications/{id}/promote-test` | 校验制品摘要并晋级测试环境 |
 | POST | `/lowcode/applications/{id}/submit` | 提交应用验收 |
 | POST | `/admin/lowcode/applications/{id}/publish` | 发布并归档旧版本 |
 | POST | `/admin/lowcode/applications/{id}/rollback` | 按快照回退已发布版本 |

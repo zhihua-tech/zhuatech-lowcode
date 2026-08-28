@@ -24,7 +24,8 @@ public class ApplicationLifecycleService {
         if(versions.existsByAppCodeAndVersionNo(r.appCode(),r.versionNo()))throw conflict("应用版本已存在");
         var item=versions.save(new ApplicationVersion(r.appCode(),r.versionNo(),r.name(),r.pageCount(),
             r.workflowCount(),r.validationErrors(),r.unresolvedDependencies(),r.testCoverage(),
-            r.criticalSecurityFindings(),r.ownerAssigned(),r.permissionsReviewed(),r.rollbackSnapshotReady()));
+            r.criticalSecurityFindings(),r.ownerAssigned(),r.permissionsReviewed(),r.rollbackSnapshotReady(),
+            r.packageDigest().toLowerCase(Locale.ROOT)));
         audit("创建应用版本",item,r.name());return item;
     }
 
@@ -43,8 +44,17 @@ public class ApplicationLifecycleService {
     }
 
     @Transactional
+    public ApplicationVersion promoteTest(Long id,PromotionRequest request){
+        var item=get(id);require(item,"DRAFT","只有草稿版本允许晋级测试环境");
+        if(!item.getPackageDigest().equalsIgnoreCase(request.packageDigest()))throw conflict("晋级制品摘要与开发基线不一致");
+        if(!"READY".equals(gate(id).decision()))throw conflict("发布门禁未通过，禁止晋级测试环境");
+        item.promoteTest();audit("晋级测试环境",item,"制品摘要校验通过");return item;
+    }
+
+    @Transactional
     public ApplicationVersion submit(Long id){
         var item=get(id);require(item,"DRAFT","只有草稿版本可以提交");
+        if(!"TEST".equals(item.getPromotedEnvironment()))throw conflict("版本必须先通过测试环境晋级");
         if(!"READY".equals(gate(id).decision()))throw conflict("发布门禁未通过");
         item.submit();audit("提交应用验收",item,"发布门禁通过");return item;
     }
@@ -83,7 +93,9 @@ public class ApplicationLifecycleService {
         @NotBlank @Size(max=120) String name,@Positive int pageCount,@PositiveOrZero int workflowCount,
         @PositiveOrZero int validationErrors,@PositiveOrZero int unresolvedDependencies,
         @DecimalMin("0") @DecimalMax("100") double testCoverage,@PositiveOrZero int criticalSecurityFindings,
-        boolean ownerAssigned,boolean permissionsReviewed,boolean rollbackSnapshotReady){}
+        boolean ownerAssigned,boolean permissionsReviewed,boolean rollbackSnapshotReady,
+        @NotBlank @Pattern(regexp="(?i)sha256:[0-9a-f]{64}") String packageDigest){}
+    public record PromotionRequest(@NotBlank @Pattern(regexp="(?i)sha256:[0-9a-f]{64}") String packageDigest){}
     public record PublishGate(String decision,String appCode,String versionNo,List<String> blockers){}
     public record Dashboard(long total,long draft,long pendingReview,long published,long blocked){}
 }

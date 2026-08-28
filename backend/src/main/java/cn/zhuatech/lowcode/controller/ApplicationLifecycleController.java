@@ -16,6 +16,8 @@ public class ApplicationLifecycleController {
     @GetMapping ApiResponse<List<ApplicationVersion>> list(){return ApiResponse.ok(service.list());}
     @PostMapping ApiResponse<ApplicationVersion> create(@Valid @RequestBody ApplicationLifecycleService.CreateRequest request){return ApiResponse.ok(service.create(request));}
     @GetMapping("/{id}/publish-gate") ApiResponse<ApplicationLifecycleService.PublishGate> gate(@PathVariable Long id){return ApiResponse.ok(service.gate(id));}
+    @PostMapping("/{id}/promote-test") ApiResponse<ApplicationVersion> promoteTest(@PathVariable Long id,
+        @Valid @RequestBody ApplicationLifecycleService.PromotionRequest request){return ApiResponse.ok(service.promoteTest(id,request));}
     @PostMapping("/{id}/submit") ApiResponse<ApplicationVersion> submit(@PathVariable Long id){return ApiResponse.ok(service.submit(id));}
     @GetMapping("/dashboard") ApiResponse<ApplicationLifecycleService.Dashboard> dashboard(){return ApiResponse.ok(service.dashboard());}
 }

@@ -23,6 +23,7 @@ class ApplicationLifecycleApiTests {
         long id=create("APP-SALES","2.0.0",0,0,88,0,true,true,true);
         mvc.perform(get("/api/lowcode/applications/{id}/publish-gate",id).with(httpBasic("operator","operator123")))
             .andExpect(status().isOk()).andExpect(jsonPath("$.data.decision").value("READY"));
+        promote(id);
         mvc.perform(post("/api/lowcode/applications/{id}/submit",id).with(httpBasic("operator","operator123")))
             .andExpect(status().isOk()).andExpect(jsonPath("$.data.state").value("PENDING_REVIEW"));
         mvc.perform(post("/api/admin/lowcode/applications/{id}/publish",id).param("remark","越权")
@@ -59,11 +60,33 @@ class ApplicationLifecycleApiTests {
             .andExpect(jsonPath("$.data[?(@.appCode == 'APP-PORTAL' && @.versionNo == '1.1.0')].state").value("PUBLISHED"));
     }
 
+    @Test
+    void promotionRejectsArtifactDriftAndSubmitRequiresTestEnvironment() throws Exception {
+        long id=create("APP-DIGEST","1.0.0",0,0,90,0,true,true,true);
+        mvc.perform(post("/api/lowcode/applications/{id}/submit",id).with(httpBasic("operator","operator123")))
+            .andExpect(status().isConflict());
+        mvc.perform(post("/api/lowcode/applications/{id}/promote-test",id).with(httpBasic("operator","operator123"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"packageDigest\":\"sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\"}"))
+            .andExpect(status().isConflict());
+        promote(id);
+        mvc.perform(post("/api/lowcode/applications/{id}/submit",id).with(httpBasic("operator","operator123")))
+            .andExpect(status().isOk());
+    }
+
     private void submitAndPublish(long id)throws Exception{
+        promote(id);
         mvc.perform(post("/api/lowcode/applications/{id}/submit",id).with(httpBasic("operator","operator123")))
             .andExpect(status().isOk());
         mvc.perform(post("/api/admin/lowcode/applications/{id}/publish",id).param("remark","版本验收通过")
                 .with(httpBasic("admin","admin123"))).andExpect(status().isOk());
+    }
+
+    private void promote(long id)throws Exception{
+        mvc.perform(post("/api/lowcode/applications/{id}/promote-test",id).with(httpBasic("operator","operator123"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"packageDigest\":\"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}"))
+            .andExpect(status().isOk()).andExpect(jsonPath("$.data.promotedEnvironment").value("TEST"));
     }
 
     private long create(String app,String version,int errors,int dependencies,double coverage,int findings,
@@ -75,7 +98,8 @@ class ApplicationLifecycleApiTests {
                     +"\"validationErrors\":"+errors+",\"unresolvedDependencies\":"+dependencies
                     +",\"testCoverage\":"+coverage+",\"criticalSecurityFindings\":"+findings
                     +",\"ownerAssigned\":"+owner+",\"permissionsReviewed\":"+permissions
-                    +",\"rollbackSnapshotReady\":"+rollback+"}"))
+                    +",\"rollbackSnapshotReady\":"+rollback
+                    +",\"packageDigest\":\"sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\"}"))
             .andExpect(status().isOk()).andReturn();
         var matcher=Pattern.compile("\\\"id\\\":(\\d+)").matcher(result.getResponse().getContentAsString());
         Assertions.assertTrue(matcher.find());return Long.parseLong(matcher.group(1));
