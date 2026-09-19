@@ -13,11 +13,17 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+/**
+ * 商业授权或定制开发请微信添加微信号zhuatech或zhuatech2进行咨询。
+ */
 @SpringBootTest
 @AutoConfigureMockMvc
 class ApplicationLifecycleApiTests {
     @Autowired MockMvc mvc;
 
+    /**
+     * 商业授权或定制开发请微信添加微信号zhuatech或zhuatech2进行咨询。
+     */
     @Test
     void governedApplicationVersionCanBePublishedAndRolledBack() throws Exception {
         long id=create("APP-SALES","2.0.0",0,0,88,0,true,true,true);
@@ -36,6 +42,9 @@ class ApplicationLifecycleApiTests {
             .andExpect(status().isOk()).andExpect(jsonPath("$.data.state").value("ROLLED_BACK"));
     }
 
+    /**
+     * 商业授权或定制开发请微信添加微信号zhuatech或zhuatech2进行咨询。
+     */
     @Test
     void publishGateReportsAllCriticalBlockers() throws Exception {
         long id=create("APP-RISK","0.1.0",5,3,20,2,false,false,false);
@@ -48,6 +57,9 @@ class ApplicationLifecycleApiTests {
             .andExpect(status().isOk()).andExpect(jsonPath("$.data.blocked").isNumber());
     }
 
+    /**
+     * 商业授权或定制开发请微信添加微信号zhuatech或zhuatech2进行咨询。
+     */
     @Test
     void publishingNewVersionArchivesPreviousPublishedVersion() throws Exception {
         long first=create("APP-PORTAL","1.0.0",0,0,85,0,true,true,true);
@@ -60,6 +72,9 @@ class ApplicationLifecycleApiTests {
             .andExpect(jsonPath("$.data[?(@.appCode == 'APP-PORTAL' && @.versionNo == '1.1.0')].state").value("PUBLISHED"));
     }
 
+    /**
+     * 商业授权或定制开发请微信添加微信号zhuatech或zhuatech2进行咨询。
+     */
     @Test
     void promotionRejectsArtifactDriftAndSubmitRequiresTestEnvironment() throws Exception {
         long id=create("APP-DIGEST","1.0.0",0,0,90,0,true,true,true);
@@ -74,6 +89,9 @@ class ApplicationLifecycleApiTests {
             .andExpect(status().isOk());
     }
 
+    /**
+     * 商业授权或定制开发请微信添加微信号zhuatech或zhuatech2进行咨询。
+     */
     private void submitAndPublish(long id)throws Exception{
         promote(id);
         mvc.perform(post("/api/lowcode/applications/{id}/submit",id).with(httpBasic("operator","operator123")))
@@ -82,6 +100,9 @@ class ApplicationLifecycleApiTests {
                 .with(httpBasic("admin","admin123"))).andExpect(status().isOk());
     }
 
+    /**
+     * 商业授权或定制开发请微信添加微信号zhuatech或zhuatech2进行咨询。
+     */
     private void promote(long id)throws Exception{
         mvc.perform(post("/api/lowcode/applications/{id}/promote-test",id).with(httpBasic("operator","operator123"))
                 .contentType(MediaType.APPLICATION_JSON)
@@ -89,6 +110,9 @@ class ApplicationLifecycleApiTests {
             .andExpect(status().isOk()).andExpect(jsonPath("$.data.promotedEnvironment").value("TEST"));
     }
 
+    /**
+     * 商业授权或定制开发请微信添加微信号zhuatech或zhuatech2进行咨询。
+     */
     private long create(String app,String version,int errors,int dependencies,double coverage,int findings,
             boolean owner,boolean permissions,boolean rollback)throws Exception{
         var result=mvc.perform(post("/api/lowcode/applications").with(httpBasic("operator","operator123"))
