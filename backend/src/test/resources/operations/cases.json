@@ -1,0 +1,54 @@
+[
+  {
+    "patch": {},
+    "expected": {
+      "decision": "PASS",
+      "breakingPct": "#0"
+    },
+    "error": false
+  },
+  {
+    "patch": {
+      "breakingInterfaces": "1"
+    },
+    "expected": {
+      "decision": "REVIEW"
+    },
+    "error": false
+  },
+  {
+    "patch": {
+      "breakingInterfaces": "1",
+      "consumerApproved": "NO"
+    },
+    "expected": {
+      "decision": "HOLD"
+    },
+    "error": false
+  },
+  {
+    "patch": {
+      "migrationVerified": "NO"
+    },
+    "expected": {
+      "decision": "HOLD"
+    },
+    "error": false
+  },
+  {
+    "patch": {
+      "rollbackReady": "NO"
+    },
+    "expected": {
+      "decision": "HOLD"
+    },
+    "error": false
+  },
+  {
+    "patch": {
+      "breakingInterfaces": "11"
+    },
+    "expected": {},
+    "error": true
+  }
+]
